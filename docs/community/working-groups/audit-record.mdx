@@ -1,0 +1,99 @@
+---
+title: Audit Record Charter
+description: Charter for the MCP Audit Record Working Group.
+---
+
+## Group Type
+
+Working Group.
+
+## Mission Statement
+
+The Audit Record Working Group defines one verifiable form for the record of a tool call and the authority it ran under, together with the conformance vectors that decide whether two implementations agree about that record. Tamper-evidence is required at several seams in the MCP specification and given a shared, checkable definition at none. SEP-2624 requires that "Audit trails are tamper-proof" and names no property a verifier can test, SEP-2809 makes an admission record a SHOULD without defining its shape, and SEP-2817 carries client-asserted audit context that its own author calls explicitly not evidence.
+
+The group produces a Standards Track SEP for the record and its verification procedure, a vector corpus with declared expectations and negative fixtures, and an offline verifier. All three exist so that a third party who trusts neither party to a call can re-check a claim about it.
+
+## Scope
+
+### In Scope
+
+Specification work covers the record's protected core, its canonical byte form, the type-keyed extension mechanism by which admission, runtime security and caller governance each attach context under one digest, the append-only chain construction, the version identifier every record carries for its canonical form, and the verification procedure a reader executes. It also triages any SEP whose subject is the record.
+
+Conformance work is a vector corpus in which every member declares the answer a conforming verifier returns, and in which each negative fixture differs from an accepting twin in one field so that a reader can tell which rule caught it. The corpus also carries a criterion for when a cross-implementation agreement claim is re-checkable by someone holding neither implementation.
+
+The reference implementation is an offline verifier. It reads a record and its extensions and returns a verdict without contacting a service. The generator that emits the corpus byte-identically ships beside it. A reader can rebuild the vectors from it and check them.
+
+One cross-cutting concern is the boundary at which an interceptor hands a decision to the record. Another is the profile that carries a transparency-service receipt outside the hashed preimage.
+
+Documentation covers the record's fields, the steps a verifier follows, the extension registry and the identifiers it admits, the negative fixtures and the axis each one fails, and the vectors an implementer runs before publishing a conformance claim.
+
+### Out of Scope
+
+MCP threat modeling and the layered view of attack surfaces belong to the Security IG, and this group takes its security requirements as input. The enforcement point at which a decision is made or a request refused belongs to the Interceptors WG. This group defines only what the record of that decision has to contain.
+
+Authorization protocol mechanics, scopes and token handling belong to the Authorization IG and the working groups it spawns. The Security IG and the Server Card WG own the requirements for establishing that a server is what it claims to be before dispatch. Operating a transparency service is out of scope entirely. A record carries a receipt, and operating the log that issued it is out of scope here.
+
+### Related Groups
+
+The [Security IG](/community/interest-groups/security) lists in scope "requirements for tamper-evident records of what a tool call did and under what authority, for compliance and incident review". Its charter scopes validated problems into focused Working Groups, and no such group exists for this one.
+
+The [Interceptors WG](/community/working-groups/interceptors) owns SEP-2624, which states the tamper-proof requirement this group makes checkable. Audit logging is an active work item on that charter. Coordination is needed on what an interceptor writes, on which fields of a decision survive into the record, and on whether a request an interceptor refuses produces a record at all.
+
+A record names the server it describes. The identifier it uses for that is the one the [Server Card WG](/community/working-groups/server-card) and the [Registry WG](/community/working-groups/registry) publish, which is where those two groups bound this work.
+
+The [Transports WG](/community/working-groups/transports) owns a case the record has to accommodate. A call over stdio has no HTTP authorization context to name, and the authority field therefore cannot assume one is present.
+
+## Leadership
+
+| Role | Name           | Organization | GitHub                                         | Term               |
+| ---- | -------------- | ------------ | ---------------------------------------------- | ------------------ |
+| Lead | Sankalp Gilda  | Independent  | [@astrogilda](https://github.com/astrogilda)   | Sponsorship sought |
+
+## Authority & Decision Rights
+
+| Decision Type                       | Authority Level                                         |
+| ----------------------------------- | ------------------------------------------------------- |
+| Meeting logistics and scheduling    | WG Leads (autonomous)                                   |
+| Proposal prioritization within WG   | WG Leads (autonomous)                                   |
+| SEP triage and closure (in scope)   | WG Leads (autonomous, with documented rationale)        |
+| Technical design within scope       | WG consensus                                            |
+| Spec changes (additive)             | WG consensus, then Core Maintainer approval             |
+| Spec changes (breaking)             | WG consensus, then Core Maintainer approval and review  |
+| Scope expansion                     | Core Maintainer approval required                       |
+| WG Member approval                  | WG Member sponsors                                      |
+
+## Operations
+
+| Meeting         | Frequency | Duration   | Purpose                                       |
+| --------------- | --------- | ---------- | --------------------------------------------- |
+| Working Session | Biweekly  | 60 minutes | Technical discussion, proposal review         |
+| Office Hours    | Monthly   | 45 minutes | Open Q&A for implementers running vectors |
+
+## Resources
+
+The threads this group exists to resolve are [SEP-2787, Tool call attestation](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2787) and [SEP-3004, the audit record contract](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3004), both closed on 2026-09-22, together with [SEP-2809, attested tool-server admission](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2809), open since 2026-05-28, and [SEP-2817, AI invocation audit context](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2817), open since 2026-05-29.
+
+One conformance input already exists. The `vectors-mcp-record-contract` corpus at tag `v0.12.0` of [probityai/agent-evidence-vectors](https://github.com/probityai/agent-evidence-vectors) holds 15 run-record members, 7 accepting and 8 rejecting, against six declared conditions, with a standalone checker that runs on any record in that shape.
+
+## Deliverables & Success Metrics
+
+### Active Work Items
+
+| Item                                                      | Status   | Target Date | Champion   |
+| --------------------------------------------------------- | -------- | ----------- | ---------- |
+| SEP for the record and its verification procedure          | Ideating |             | TBD        |
+| Vector corpus with declared expectations                   | Draft    |             | astrogilda |
+| Negative fixtures, one declared failure axis each          | Draft    |             | astrogilda |
+| Cross-run record criterion and its checker                 | Draft    |             | astrogilda |
+| Offline reference verifier                                 | Ideating |             | TBD        |
+| Triage disposition for the four SEPs above                 | Ideating |             | TBD        |
+
+### Success Criteria
+
+An accepted SEP exists, and two independent implementations execute its verification procedure to the same answer. The corpus is published and every verification rule has negative coverage, so an implementer can run it before claiming conformance. Each of the four SEPs under Resources has a published disposition: adoption, supersession, or a documented reason to close. And the comparison between two implementations is itself recorded well enough that a third party can repeat it from what is published.
+
+## Changelog
+
+| Date       | Change                   |
+| ---------- | ------------------------ |
+| 2026-09-22 | Initial charter proposal |
