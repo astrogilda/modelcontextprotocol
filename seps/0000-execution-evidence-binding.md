@@ -3,6 +3,7 @@
 - **Status**: Draft
 - **Type**: Standards Track
 - **Created**: 2026-10-09
+- **Updated**: 2026-10-18 (adds the call binding)
 - **Author(s)**: Sankalp Gilda (@astrogilda)
 - **Sponsor**: None (seeking sponsor through the Audit Record Working Group)
 - **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/{NUMBER}
@@ -80,6 +81,41 @@ Rules:
 5. The entry is optional. Its absence MUST NOT change how a client handles a
    result.
 
+### The call binding
+
+A record about a call (a proxy's decision, a server's audit entry, the Statement
+named above) needs a value that every hop agrees on. The JSON-RPC `id` is not
+one: each hop may renumber it. `params._meta` is not part of it either: hops add
+and rewrite it (`progressToken`, trace context, the SEP-2817 `aiInvocation`
+entry). This SEP defines:
+
+```
+callBinding = "sha256:" + lowercase-hex(SHA-256(JCS({
+  "method": <request method>,
+  "params": <request params with the member "_meta" removed>
+})))
+```
+
+where JCS is the JSON Canonicalization Scheme of RFC 8785.
+
+Rules:
+
+1. `id`, `jsonrpc` and `params._meta` are excluded. Every other member of
+   `params` is included, at every depth, so a changed argument value, a changed
+   array order or a changed tool name gives a different binding, and reordered
+   object members give the same one.
+2. A request whose `params._meta` is present and is not a JSON object is
+   malformed, and no binding is computed for it.
+3. A record about a call SHOULD carry its binding, in the record's own field or
+   under `_meta["io.modelcontextprotocol/callBinding"]`. A verifier recomputes
+   the binding from the request it holds and MUST refuse a record whose binding
+   differs.
+4. An intermediary MUST NOT move a member of `params` into `params._meta`. The
+   binding detects it, because the moved member leaves the bound value.
+
+The binding identifies the call, not its outcome: two records with equal
+bindings are about the same request, and nothing more is established by it.
+
 ### Key name
 
 Under the `_meta` key-name rules, a prefix whose second label is
@@ -118,6 +154,19 @@ The first entry:
 The corpus ships in the PyPI package `agent-evidence-vectors==0.17.5`, and the
 GitHub Action `probityai/agent-evidence-vectors@v0.17.5` with
 `corpus: vectors-agent-audit-record` replays it against any verifier in CI.
+
+## Conformance for the call binding
+
+The reference cases are the `invocation_axes` corpus of
+probityai/agent-evidence-vectors at commit
+`b7d50a8e`, which pins the binding of its base request as
+`sha256:16944d7c4e9028cd7923febf8e5c35d8b1be54b6d08ccfe2a35e1fb22e579761`.
+Same binding: `argument_members_reordered`, `hop_metadata_added`. Different
+binding: `argument_value_changed`, `array_order_changed`, `tool_name_changed`,
+`argument_moved_into_meta`. The corpus ships with the reader
+`agent-evidence-vectors-invocation-axes` in the PyPI package
+`agent-evidence-vectors`; release 0.20.0 predates the `_meta` exclusion, so the
+pinned release for this SEP is the first one after it.
 
 ## Rationale
 
