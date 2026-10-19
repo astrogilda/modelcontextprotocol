@@ -152,25 +152,24 @@ The first entry:
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `predicateType`    | `https://probityai.github.io/agent-evidence-vectors/predicate/v1/agent-audit-record`                                                                      |
 | Specification      | Internet-Draft `draft-gilda-wimse-agent-audit-record-02`, which fixes the URI                                                                             |
-| Conformance corpus | probityai/agent-evidence-vectors v0.20.0, `vectors-agent-audit-record/`, corpus digest `fec27bdf2660063872967d6abde35d7c4b86a4c5038237e952edfb0d92d884cf` |
+| Conformance corpus | probityai/agent-evidence-vectors v0.21.0, `vectors-agent-audit-record/`, corpus digest `fec27bdf2660063872967d6abde35d7c4b86a4c5038237e952edfb0d92d884cf` |
 | Counts             | 71 members (17 accept, 52 reject, 2 indeterminate)                                                                                                        |
 
-The corpus ships in the PyPI package `agent-evidence-vectors==0.20.0`, and the
-GitHub Action `probityai/agent-evidence-vectors@v0.20.0` with
+The corpus ships in the PyPI package `agent-evidence-vectors==0.21.0`, and the
+GitHub Action `probityai/agent-evidence-vectors@v0.21.0` with
 `corpus: vectors-agent-audit-record` replays it against any verifier in CI.
 
 ## Conformance for the call binding
 
 The reference cases are the `invocation_axes` corpus of
-probityai/agent-evidence-vectors at commit
-`b7d50a8e`, which pins the binding of its base request as
+probityai/agent-evidence-vectors v0.21.0, which pins the binding of its base
+request as
 `sha256:16944d7c4e9028cd7923febf8e5c35d8b1be54b6d08ccfe2a35e1fb22e579761`.
 Same binding: `argument_members_reordered`, `hop_metadata_added`. Different
 binding: `argument_value_changed`, `array_order_changed`, `tool_name_changed`,
 `argument_moved_into_meta`. The corpus ships with the reader
 `agent-evidence-vectors-invocation-axes` in the PyPI package
-`agent-evidence-vectors`; release 0.20.0 predates the `_meta` exclusion, so the
-pinned release for this SEP is the first one after it.
+`agent-evidence-vectors==0.21.0`, the first release with the `_meta` exclusion.
 
 ## Rationale
 
